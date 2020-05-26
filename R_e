@@ -34,7 +34,7 @@ lapply(libs, instalar)
 Cargamos los datos relacionados al brote de covid-19 en iran
 ```{r}
 data<-read.csv("persiadef2.csv", header=TRUE)     # Hay que poner el nombre de su archivo (Tip: ten el archivo de datos en la misma carpeta que este archivo)
-names(data)<-c("dia","acumulado","individual")    # Ve a la línea 52.
+names(data)<-c("dia","acumulado","individual")    # Para modificar el R(t) ve a la línea 158.
 head(data)
 ```
 
