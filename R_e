@@ -155,15 +155,15 @@ plotfit(res.R)
 ```
 
 ```{r}
-TD <- est.R0.TD(epid, GT.covid, begin=1, end=fin, nsim=100) 
+inicio <- 1        #Aquí va el primer día.
+TD <- est.R0.TD(epid, GT.covid, begin=inicio, end=fin, nsim=100) 
 TD
-TD.weekly <- smooth.Rt(TD, 7)
+TD.weekly <- smooth.Rt(TD, 25)
 ```
 Semanal
 ```{r}
-TD.weekly
+TD.weekly # Los cuatro primeros números del vector aquí impreso es lo que hay que reportar.
 ```
-Semanal
 
 ```{r}
 plot(TD.weekly)
