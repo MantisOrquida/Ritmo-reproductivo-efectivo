@@ -33,28 +33,16 @@ lapply(libs, instalar)
 
 Cargamos los datos relacionados al brote de covid-19 en iran
 ```{r}
-data<-read.csv("Aguascalientes.csv", header=TRUE)     # Hay que poner el nombre de su archivo (Tip: ten el archivo de datos en la misma carpeta que este archivo)
-names(data)<-c("dia","individual","acumulado")    # Para modificar el R(t) ve a la línea 158.
+data<-read.csv("Tabasco.csv", header=TRUE)     # Hay que poner el nombre de su archivo (Tip: ten el archivo de datos en la misma carpeta que este archivo)
+names(data)<-c("dia","individual","acumulado")    
 head(data)
 ```
-
-Graficamos los casos
-
-```{r}
-plot(individual~dia,data,type='b',bty='l',
-      main='Brote de Covid-19 en Irán',                            # Hay que escribir títulos y nombres para los ejes apropiados.
-      xlab='Día',ylab='Casos de Covid-19')
-plot(log(individual + 1)~dia,data,type='b',log='y',bty='l',main='Gráfica semilog de datos individuales de brote de covid-19 en Irán',
-      xlab='Día',ylab='Casos de Covid-19')
-```
-
-
 ```{r}
 fin<- 137                                         # Hay que poner el día final. Creo que todos acaban en 137 pero hay que tener cuidado por si no.
-Dias<-2:fin                                    
-pendiente<-numeric(length=length(Dias))          # Con está gráfica elige el día que termine el crecimiento exponencial.
-d<-17                                            # Aquí va el número seleccionado.
-pendiente.se<-numeric(length=length(Dias))       # Ve a la línea 147.
+Dias<-4:fin                                    # Recorran el primer número para ver claramente d.
+pendiente<-numeric(length=length(Dias))          # Con está gráfica elige el día que termine el crecimiento exponencial y cambia su valor en la línea 44.
+d<-30                                          # Aquí va el número seleccionado.
+pendiente.se<-numeric(length=length(Dias))       
 for (k in seq_along(Dias)){
   fit<-lm(log(individual + 1)~dia, data=subset(data, dia<=Dias[k]))
   pendiente[k]<-coef(summary(fit))[2,1]
@@ -65,62 +53,6 @@ for (k in seq_along(Dias)){
  plot(pendiente~Dias,type="o")
  plot(pendiente.se~Dias,type="o")
 ```
-
-
-```{r}
-plot(range(Dias), 
-     range(c(R0.hat-2*R0.se,R0.hat+2*R0.se),na.rm=T), 
-     type='n',bty='l',
-     xlab="Día",
-     ylab= expression("Estimado" ~ R[0])
-)
-     lines(R0.hat~Dias, type='o',lwd=2)
-     lines(R0.hat+2*R0.se~Dias,type='l')
-     lines(R0.hat-2*R0.se~Dias,type='l')
-```
-
-Con el punto en dónde la banda de confianza se minimiza se elige la d de la linea 85.
-
-Calculamos una regreción lineal con el logaritmo de los datos individuales y el día del brote, para los primeros 12 días, pues a partir de estos el comportamiento es de crecimiento exponencial : 
-
-```{r}
-fit <- lm(log(individual+1)~dia,data=subset(data,dia<=d))
-summary(fit)
-```
-
-Observamos los coeficientes de la regresión y utilizamos el coeficiente de la variable día para definir la pendiente:
-
-```{r}
-coef(fit)
-pendiente <- coef(fit)[2]
-pendiente
-```
-Notar que aquí el p-value es significativo con un $\alpha=0.05$
-
-Calculemos $R_0$ a sin ayuda de paquetes ni loops, sabemos que $m=(R_0-1)(\mu+\gamma)$: 
-```{r}
-gamma<-1/5.1 #1/gamma es el tiempo promedio de infección que para el covid-19 es 5.1 días
-m<-pendiente
-mu<-1/(70*365) #1/mu es el tiempo promedio de vida
-r0<-m/(mu+gamma)+1
-r0
-```
-
-Ahora queremos calcular el error estándar de la pendiente:
-
-```{r}
-pendiente.se<-coef(summary(fit))[2,2]
-pendiente.se
-err<-2.5*pendiente.se
-```
-Ahora calculamos un intervalo de confianza para $R_0$:
-```{r}
-(inf<-r0-err)
-(sup<-r0+err)
-```
-
-Así, se tiene que $R_0= 2.667569$ y el intervalo de confianza es $[2.608483   , 2.726656 ]$
-
 
 #Calculamos el $R_0$ con la paquetría de R.
 
@@ -135,19 +67,11 @@ Según investigaciones previas de epidemiologos, el brote de covid-19 se puede m
 ```{r}
 GT.covid<-generation.time("weibull",c(3.95,1))
 ```
-
-Realizamos el analisis de sensibilidad:
-
-
-```{r}
-sensitivity.analysis(epid, GT.covid, begin=1,end=fin, est.method="EG", sa.type="time") # Hay que poner en end los días totales que tienes de datos
-```
-
 Estimamos $R_0$ con los datos de incidencia usando el método con crecimiento exponencial:
 
 ```{r}
 res.R<-estimate.R(epid,GT=GT.covid,methods=c("EG"))            # A partir de aquí recolectamos resultados.
-(EG<-est.R0.EG(epid,GT.covid,begin=1,end=d,nsim=1000))
+(EG<-est.R0.EG(epid,GT.covid,begin=2,end=d,nsim=1000))
 ```
 
 ```{r}
@@ -155,7 +79,7 @@ plotfit(res.R)
 ```
 
 ```{r}
-inicio <- 7        #Aquí va el primer día.
+inicio <- 2       #Aquí va el primer día.
 TD <- est.R0.TD(epid, GT.covid, begin=inicio, end=fin, nsim=300) 
 TD
 TD.weekly <- smooth.Rt(TD, 25)
