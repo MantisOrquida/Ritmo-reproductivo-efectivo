@@ -80,7 +80,8 @@ plotfit(res.R)
 ```
 
 ```{r}
-TD <- est.R0.TD(epid, GT.covid, begin=inicio, end=fin, nsim=300) 
+k <- 0
+TD <- est.R0.TD(epid, GT.covid, begin=inicio-25*k, end=fin, nsim=300) 
 TD
 TD.weekly <- smooth.Rt(TD, 25)
 ```
