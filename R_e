@@ -38,10 +38,11 @@ names(data)<-c("dia","individual","acumulado")
 head(data)
 ```
 ```{r}
+inicio <- 2                                       # Primer día de infección.
 fin<- 137                                         # Hay que poner el día final. Creo que todos acaban en 137 pero hay que tener cuidado por si no.
+d<-30                                          # Aquí va el día en el cual terminó el crecimiento exponencial.
 Dias<-4:fin                                    # Recorran el primer número para ver claramente d.
 pendiente<-numeric(length=length(Dias))          # Con está gráfica elige el día que termine el crecimiento exponencial y cambia su valor en la línea 44.
-d<-30                                          # Aquí va el número seleccionado.
 pendiente.se<-numeric(length=length(Dias))       
 for (k in seq_along(Dias)){
   fit<-lm(log(individual + 1)~dia, data=subset(data, dia<=Dias[k]))
@@ -71,7 +72,7 @@ Estimamos $R_0$ con los datos de incidencia usando el método con crecimiento ex
 
 ```{r}
 res.R<-estimate.R(epid,GT=GT.covid,methods=c("EG"))            # A partir de aquí recolectamos resultados.
-(EG<-est.R0.EG(epid,GT.covid,begin=2,end=d,nsim=1000))
+(EG<-est.R0.EG(epid,GT.covid,begin=inicio,end=d,nsim=1000))
 ```
 
 ```{r}
@@ -79,7 +80,6 @@ plotfit(res.R)
 ```
 
 ```{r}
-inicio <- 2       #Aquí va el primer día.
 TD <- est.R0.TD(epid, GT.covid, begin=inicio, end=fin, nsim=300) 
 TD
 TD.weekly <- smooth.Rt(TD, 25)
