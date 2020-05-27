@@ -33,30 +33,30 @@ lapply(libs, instalar)
 
 Cargamos los datos relacionados al brote de covid-19 en iran
 ```{r}
-data<-read.csv("persiadef2.csv", header=TRUE)     # Hay que poner el nombre de su archivo (Tip: ten el archivo de datos en la misma carpeta que este archivo)
-names(data)<-c("dia","acumulado","individual")    # Para modificar el R(t) ve a la línea 158.
+data<-read.csv("Aguascalientes.csv", header=TRUE)     # Hay que poner el nombre de su archivo (Tip: ten el archivo de datos en la misma carpeta que este archivo)
+names(data)<-c("dia","individual","acumulado")    # Para modificar el R(t) ve a la línea 158.
 head(data)
 ```
 
 Graficamos los casos
 
 ```{r}
-#plot(individual~dia,data,type='b',bty='l',
-#      main='Brote de Covid-19 en Irán',                            # Hay que escribir títulos y nombres para los ejes apropiados.
-#      xlab='Día',ylab='Casos de Covid-19')
-#plot(log(individual)~dia,data,type='b',log='y',bty='l',main='Gráfica semilog de datos individuales de brote de covid-19 en Irán',
-#      xlab='Día',ylab='Casos de Covid-19')
+plot(individual~dia,data,type='b',bty='l',
+      main='Brote de Covid-19 en Irán',                            # Hay que escribir títulos y nombres para los ejes apropiados.
+      xlab='Día',ylab='Casos de Covid-19')
+plot(log(individual + 1)~dia,data,type='b',log='y',bty='l',main='Gráfica semilog de datos individuales de brote de covid-19 en Irán',
+      xlab='Día',ylab='Casos de Covid-19')
 ```
 
 
 ```{r}
 fin<- 137                                         # Hay que poner el día final. Creo que todos acaban en 137 pero hay que tener cuidado por si no.
-Dias<-2:fin                                       
+Dias<-2:fin                                    
 pendiente<-numeric(length=length(Dias))          # Con está gráfica elige el día que termine el crecimiento exponencial.
 d<-17                                            # Aquí va el número seleccionado.
 pendiente.se<-numeric(length=length(Dias))       # Ve a la línea 147.
 for (k in seq_along(Dias)){
-  fit<-lm(log(individual)~dia, data=subset(data, dia<=Dias[k]))
+  fit<-lm(log(individual + 1)~dia, data=subset(data, dia<=Dias[k]))
   pendiente[k]<-coef(summary(fit))[2,1]
   pendiente.se[k]<-coef(summary(fit))[2,2]
   R0.hat<-pendiente*2.5+1
@@ -84,7 +84,7 @@ Con el punto en dónde la banda de confianza se minimiza se elige la d de la lin
 Calculamos una regreción lineal con el logaritmo de los datos individuales y el día del brote, para los primeros 12 días, pues a partir de estos el comportamiento es de crecimiento exponencial : 
 
 ```{r}
-fit <- lm(log(individual)~dia,data=subset(data,dia<=d))
+fit <- lm(log(individual+1)~dia,data=subset(data,dia<=d))
 summary(fit)
 ```
 
@@ -127,7 +127,7 @@ Así, se tiene que $R_0= 2.667569$ y el intervalo de confianza es $[2.608483   ,
 Ya se tiene la librería cargada, tenemos que crear el vector de casos por día:
 
 ```{r}
-epid=data$individual
+epid=data$individual+1
 ```
 
 Según investigaciones previas de epidemiologos, el brote de covid-19 se puede modelas con una distribución Weibull, sabemos que el tiempo promedio de infección es de 3.95 días y tenemos datos para cada día:
@@ -155,8 +155,8 @@ plotfit(res.R)
 ```
 
 ```{r}
-inicio <- 1        #Aquí va el primer día.
-TD <- est.R0.TD(epid, GT.covid, begin=inicio, end=fin, nsim=100) 
+inicio <- 7        #Aquí va el primer día.
+TD <- est.R0.TD(epid, GT.covid, begin=inicio, end=fin, nsim=300) 
 TD
 TD.weekly <- smooth.Rt(TD, 25)
 ```
